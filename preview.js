@@ -66,6 +66,7 @@ function handle(path,method,body){const [route,qs]=path.split('?');const q=new U
       case 'bots':return clone(S.bots);case 'projects':return clone(S.projects);case 'builds':return clone([...S.jobs].reverse());
       case 'control-center':return {...center(),pendingAccounts:clone(S.accounts.filter(a=>a.status==='pending'))};
       case 'models':return modelsStatus();
+      case 'me-theme':return clone(S.theme||{preset:'bacon',accent:'#ff7399',accent2:'#df4c65',background:'#121116',surface:'#1b1a21',text:'#f6f1f5'});
       case 'me-app':return clone(S.look||{name:'Bacon AI',shortName:'Bacon AI',themeColor:'#131217',backgroundColor:'#131217',icon:null,emoji:null});
       case 'me':return {id:'owner',email:'owner',role:'admin',status:'active',owner:true};
       case 'accounts':return {accounts:clone(S.accounts),emailConfigured:false,emailError:null,bans:clone(S.bans)};
@@ -106,6 +107,7 @@ function handle(path,method,body){const [route,qs]=path.split('?');const q=new U
     case 'signup-verify':{const v=S.verify||err(400,'That code expired. Start the sign-up again.');if(body.code!=='123456'){v.attempts++;if(v.attempts>=5){S.verify=null;err(400,'Too many wrong codes. Start the sign-up again.');}err(400,`Wrong code. ${5-v.attempts} attempt(s) left.`);}
       S.verify=null;S.accounts.push({id:hex(),email:v.email,name:v.name,role:'user',status:'pending',created:now(),cloudBudget:null,devices:1,tailnet:[]});return {status:'pending',email:v.email,message:'Email verified (preview). It now waits for owner approval in Control center → Accounts.'};}
     case 'login':err(400,'Preview: sign-in is simulated. Connect a real controller to sign in.');
+    case 'me-theme':{const b=body||{};if(!['accent','accent2','background','surface','text'].every(k=>/^#[0-9a-fA-F]{6}$/.test(b[k]||'')))err(400,'Colours must look like #1a2b3c.');S.theme=clone(b);return clone(b);}
     case 'me-app':{const b=body||{};if(typeof b.shortName!=='string'||!b.shortName.trim()||b.shortName.length>15)err(400,'Home-screen name must be 1–15 characters (longer names get cut off).');if(![b.themeColor,b.backgroundColor].every(c=>/^#[0-9a-fA-F]{6}$/.test(c||'')))err(400,'Colours must look like #1a2b3c.');if(b.icon!=null&&!(typeof b.icon==='string'&&b.icon.startsWith('data:image/png;base64,')))err(400,'The app icon must be a PNG made by the app (under 450 KB).');S.look=clone(b);return clone(b);}
     case 'logout':return {signedOut:true};
     case 'accounts':{const u=S.accounts.find(x=>x.id===body.id)||err(400,'Account not found.');const a=body.action;
