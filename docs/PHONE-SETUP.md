@@ -113,3 +113,11 @@ After entering the address, the app offers three separate screens:
 When someone verifies a new account, the owner sees a yellow **"new accounts waiting"** bar with a count, plus a
 badge on Control center, and also gets the email. Approve (with their age) or Decline right from the bar, from the
 email link, or in **Accounts**.
+
+## Customise the home-screen app
+Go to *Control center → 📱 Home-screen app*. Pick a name, a short home-screen name (up to 15 letters), an emoji
+or photo for the icon, and the theme (status bar) and background colours, then press **Save & apply**.
+After that, use **Add to Home Screen**. The settings are saved to your account and on that device.
+- iPhone and iPad copy the name and icon at the moment you add the app. To change them later, remove the icon
+  and add it again. Safari also lets you edit the name in the Add dialog.
+- Android/Chrome may take a while to update an installed app's icon. The theme colour changes right away.

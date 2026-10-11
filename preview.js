@@ -66,6 +66,7 @@ function handle(path,method,body){const [route,qs]=path.split('?');const q=new U
       case 'bots':return clone(S.bots);case 'projects':return clone(S.projects);case 'builds':return clone([...S.jobs].reverse());
       case 'control-center':return {...center(),pendingAccounts:clone(S.accounts.filter(a=>a.status==='pending'))};
       case 'models':return modelsStatus();
+      case 'me-app':return clone(S.look||{name:'Bacon AI',shortName:'Bacon AI',themeColor:'#131217',backgroundColor:'#131217',icon:null,emoji:null});
       case 'me':return {id:'owner',email:'owner',role:'admin',status:'active',owner:true};
       case 'accounts':return {accounts:clone(S.accounts),emailConfigured:false,emailError:null,bans:clone(S.bans)};
       case 'approval-link':err(400,'Preview: approval links come from real sign-up emails.');
@@ -105,6 +106,7 @@ function handle(path,method,body){const [route,qs]=path.split('?');const q=new U
     case 'signup-verify':{const v=S.verify||err(400,'That code expired. Start the sign-up again.');if(body.code!=='123456'){v.attempts++;if(v.attempts>=5){S.verify=null;err(400,'Too many wrong codes. Start the sign-up again.');}err(400,`Wrong code. ${5-v.attempts} attempt(s) left.`);}
       S.verify=null;S.accounts.push({id:hex(),email:v.email,name:v.name,role:'user',status:'pending',created:now(),cloudBudget:null,devices:1,tailnet:[]});return {status:'pending',email:v.email,message:'Email verified (preview). It now waits for owner approval in Control center → Accounts.'};}
     case 'login':err(400,'Preview: sign-in is simulated. Connect a real controller to sign in.');
+    case 'me-app':{const b=body||{};if(typeof b.shortName!=='string'||!b.shortName.trim()||b.shortName.length>15)err(400,'Home-screen name must be 1–15 characters (longer names get cut off).');if(![b.themeColor,b.backgroundColor].every(c=>/^#[0-9a-fA-F]{6}$/.test(c||'')))err(400,'Colours must look like #1a2b3c.');if(b.icon!=null&&!(typeof b.icon==='string'&&b.icon.startsWith('data:image/png;base64,')))err(400,'The app icon must be a PNG made by the app (under 450 KB).');S.look=clone(b);return clone(b);}
     case 'logout':return {signedOut:true};
     case 'accounts':{const u=S.accounts.find(x=>x.id===body.id)||err(400,'Account not found.');const a=body.action;
       if(a==='update'){const c=body.changes||{};if(c.status&&!['active','denied','pending'].includes(c.status))err(400,'Invalid status.');if(c.role&&!['user','admin'].includes(c.role))err(400,'Invalid role.');if('cloudBudget' in c&&c.cloudBudget!==null&&!(Number.isInteger(c.cloudBudget)&&c.cloudBudget>=0&&c.cloudBudget<=1000))err(400,'Cloud budget must be 0–1000 calls per day, or blank for no personal limit.');if('age' in c){if(c.age!==null&&!(Number.isInteger(c.age)&&c.age>=3&&c.age<=120))err(400,'Enter an age from 3 to 120.');u.age=c.age;u.adult=c.age!==null&&c.age>=18;if(!u.adult)u.swearing=false;delete c.age;}if('swearing' in c){if(c.swearing&&!u.adult)err(400,'Swearing mode is only for adults (18+). The owner sets ages.');u.swearing=!!c.swearing;delete c.swearing;}Object.assign(u,c);}
