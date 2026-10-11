@@ -64,7 +64,7 @@ function handle(path,method,body){const [route,qs]=path.split('?');const q=new U
     switch(route){
       case 'status':return {models:['qwen2.5-coder:7b (sample)'],ollamaError:null,cloudConfigured:true,cloudBackend:'codex',localModel:'qwen2.5-coder:7b',hybridState:{}};
       case 'bots':return clone(S.bots);case 'projects':return clone(S.projects);case 'builds':return clone([...S.jobs].reverse());
-      case 'control-center':return center();
+      case 'control-center':return {...center(),pendingAccounts:clone(S.accounts.filter(a=>a.status==='pending'))};
       case 'models':return modelsStatus();
       case 'me':return {id:'owner',email:'owner',role:'admin',status:'active',owner:true};
       case 'accounts':return {accounts:clone(S.accounts),emailConfigured:false,emailError:null,bans:clone(S.bans)};
@@ -100,8 +100,8 @@ function handle(path,method,body){const [route,qs]=path.split('?');const q=new U
       if(st.localModel){if(!S.installed.includes(st.localModel))err(400,'Install that Ollama model first (Pull), then select it.');S.brain.localModel=st.localModel;}
       if(st.cloudModel!==undefined)S.brain.cloudModel=String(st.cloudModel).slice(0,60);return clone(S.brain);}
     case 'model-pull':{if(body.confirmed!==true)err(400,'Downloading a model needs confirmation (it can be several GB).');const name=String(body.name||'');if(!CATALOG.some(c=>c.name===name))err(400,'Invalid Ollama model name.');if(Object.values(S.pulls).some(p=>p.state==='pulling'))err(400,'A model download is already running.');S.pulls[name]={state:'pulling',status:'starting (simulated)',percent:0};simulatePull(name);return {name,state:'pulling'};}
-    case 'signup':{const e=String(body.email||'').trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(e))err(400,'Enter a valid email address.');if(String(body.password||'').length<10)err(400,'Use a password of at least 10 characters.');S.verify={email:e,name:body.name||e.split('@')[0],attempts:0};return {status:'verify',email:e,message:'Preview: no email is sent. The sample code is 123456.'};}
-    case 'signup-resend':if(!S.verify)err(400,'That sign-up expired. Start again.');return {status:'verify',email:S.verify.email,message:'Preview: the sample code is still 123456.'};
+    case 'signup':{const e=String(body.email||'').trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(e))err(400,'Enter a valid email address.');if(String(body.password||'').length<10)err(400,'Use a password of at least 10 characters.');S.verify={email:e,name:body.name||e.split('@')[0],attempts:0};return {status:'verify',email:e,message:'We emailed a 6-digit code to '+e+'. (Preview only: no email is sent. Sample-only code for this preview: 123456.)'};}
+    case 'signup-resend':if(!S.verify)err(400,'That sign-up expired. Start again.');return {status:'verify',email:S.verify.email,message:'New code sent. (Preview only: the sample-only code is still 123456.)'};
     case 'signup-verify':{const v=S.verify||err(400,'That code expired. Start the sign-up again.');if(body.code!=='123456'){v.attempts++;if(v.attempts>=5){S.verify=null;err(400,'Too many wrong codes. Start the sign-up again.');}err(400,`Wrong code. ${5-v.attempts} attempt(s) left.`);}
       S.verify=null;S.accounts.push({id:hex(),email:v.email,name:v.name,role:'user',status:'pending',created:now(),cloudBudget:null,devices:1,tailnet:[]});return {status:'pending',email:v.email,message:'Email verified (preview). It now waits for owner approval in Control center → Accounts.'};}
     case 'login':err(400,'Preview: sign-in is simulated. Connect a real controller to sign in.');

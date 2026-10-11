@@ -101,3 +101,15 @@ Brain Mode. ChatGPT Plus needs that always-on server; see `docs/ORACLE-FREE.md`.
 Under *My bots → Create/Edit → Or upload an icon* you can pick any photo, including big iPhone photos and HEIC.
 The browser crops it to a square and shrinks it to a small image (about 10–60 KB) before saving.
 The photo then replaces the emoji in the sidebar, bot list, chat header and chat bubbles.
+
+## Sign-in screens
+After entering the address, the app offers three separate screens:
+- **👤 Sign in**: for family members whose account is already approved.
+- **✨ Create account**: a new regular account. A 6-digit code is emailed to you, and it is only ever sent by
+  email, never shown on screen. Every new account is a regular user; only the owner can make someone an admin.
+- **🔑 Owner sign-in**: *Only for the owner. Enter your owner key.* The owner key (also called the pairing token)
+  is shown on the PC in the Start.cmd window, or in the setup output on a cloud server.
+
+When someone verifies a new account, the owner sees a yellow **"new accounts waiting"** bar with a count, plus a
+badge on Control center, and also gets the email. Approve (with their age) or Decline right from the bar, from the
+email link, or in **Accounts**.
