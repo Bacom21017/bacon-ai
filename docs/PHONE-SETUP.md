@@ -86,3 +86,18 @@ Brain Mode. ChatGPT Plus needs that always-on server; see `docs/ORACLE-FREE.md`.
   uses *your* Tailscale login, banning cannot tell their device apart from yours, so give each person
   their own Tailscale account (or share your PC with them from the Tailscale console).
 - Your pairing token always works for you, even on a blocked device.
+
+## Kid-friendly filter and Swearing mode
+- Every family account is **kid-friendly by default**. Bacon AI tells the AI models to keep replies kid-safe
+  and masks swear words in everything shown to that person (for example `s***`). You, the owner (pairing token), are never filtered.
+- When you approve someone (from the email link or **Accounts**), you enter their **age**. Only you can change it.
+  18+ counts as an adult. If no age is set, the person is treated as a minor.
+- Adults can turn on **Swearing mode** under *Control center → My account*. It's off by default, and minors can't turn it on.
+  If you later set someone's age under 18, Swearing mode switches off.
+- No filter is perfect. The word filter catches common swear words and simple tricks like `sh1t` or `f u c k`.
+  It's a safety net, not a guarantee, so keep an eye on young children.
+
+## Bot photos
+Under *My bots → Create/Edit → Or upload an icon* you can pick any photo, including big iPhone photos and HEIC.
+The browser crops it to a square and shrinks it to a small image (about 10–60 KB) before saving.
+The photo then replaces the emoji in the sidebar, bot list, chat header and chat bubbles.
