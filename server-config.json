@@ -1,0 +1,7 @@
+{
+  "_readme": "Site-level server list for the Bacon AI website. Edit on GitHub: open this file, click the pencil, change it, Commit. Never put tokens or owner keys here: this file is public. URLs must be https (Tailscale serve gives you one). The Test server below is a PLACEHOLDER and does not exist until you replace its url with your own.",
+  "defaultServer": "Test server",
+  "servers": [
+    {"name": "Test server", "url": "https://bacon-test.example.ts.net", "mode": "hybrid", "placeholder": true}
+  ]
+}

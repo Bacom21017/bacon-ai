@@ -342,4 +342,26 @@ $('botIconBg').addEventListener('input',()=>botComposer.setBg($('botIconBg').val
 $('botIconFg').addEventListener('input',()=>{$('botFgNote').textContent='Custom colour';botComposer.setColor($('botIconFg').value);});
 $('botUploadLabel').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('botIconFile').click();}});
 $('botIconFile').onchange=()=>{const f=$('botIconFile').files[0];if(!f)return;iconMsg('Preparing photo…');iconWork=loadPhotoFile(f).then(url=>botComposer.setPhoto(url)).catch(e=>iconMsg(e.message,true)).finally(()=>{iconWork=null;$('botIconFile').value='';});};
+/* ---- Site server list (server-config.json, editable on GitHub; never contains tokens) ---- */
+const SERVER_KEY='bacon-server';let siteServers={defaultServer:'',servers:[]},urlServer=null;
+function cleanServer(raw){try{const u=new URL(String(raw||'').trim());if(u.protocol!=='https:'||u.username||u.password||u.search||u.hash||(u.pathname!=='/'&&u.pathname!==''))return null;return u.origin;}catch(e){return null;}}
+function parseServerConfig(c){const out={defaultServer:'',servers:[]};if(!c||typeof c!=='object')return out;
+ for(const s of Array.isArray(c.servers)?c.servers.slice(0,20):[]){const url=cleanServer(s&&s.url);if(!url||typeof s.name!=='string')continue;out.servers.push({name:s.name.slice(0,60),url,mode:s.mode==='chatgpt-only'?'chatgpt-only':'hybrid',placeholder:!!s.placeholder});}
+ const d=out.servers.find(s=>s.name===c.defaultServer||s.url===cleanServer(c.defaultServer));out.defaultServer=d?d.url:'';return out;}
+function chosenServer(){if(urlServer)return {url:urlServer,source:'link'};const saved=cleanServer(localStorage.getItem(SERVER_KEY));if(saved)return {url:saved,source:'saved'};return siteServers.defaultServer?{url:siteServers.defaultServer,source:'default'}:null;}
+function serverInfo(url){return siteServers.servers.find(s=>s.url===url);}
+function renderServerPickers(){for(const box of document.querySelectorAll('[data-server-picker]')){box.replaceChildren();const cur=chosenServer();
+ const sel=document.createElement('select');sel.setAttribute('aria-label','Server');for(const s of siteServers.servers){const o=el('option',s.name+(s.placeholder?' (placeholder, not real yet)':'')+' · '+(s.mode==='chatgpt-only'?'ChatGPT only':'Hybrid'));o.value=s.url;sel.append(o);}
+ const custom=el('option','Custom address…');custom.value='';sel.append(custom);const inp=document.createElement('input');inp.type='url';inp.placeholder='https://my-pc.tailnet-name.ts.net';inp.setAttribute('aria-label','Custom server address');
+ sel.value=cur&&serverInfo(cur.url)?cur.url:'';inp.value=cur&&!serverInfo(cur.url)?cur.url:'';inp.hidden=sel.value!=='';sel.onchange=()=>{inp.hidden=sel.value!=='';};
+ const save=el('button','Use this server');save.type='button';save.className='primary';const reset=el('button','Use site default');reset.type='button';const msg=el('p','','micro');msg.setAttribute('role','status');
+ const ph=cur&&serverInfo(cur.url)?.placeholder;msg.textContent=!cur?'No server set yet.':ph?'⚠️ '+serverInfo(cur.url).name+' is a placeholder in server-config.json. It won\u2019t connect until the site owner replaces it.':'Current: '+cur.url+(cur.source==='link'?' (from link, this visit only)':cur.source==='saved'?' (saved on this device)':' (site default)');
+ save.onclick=()=>{const v=sel.value||cleanServer(inp.value);if(!v){msg.textContent='Enter an https:// address with no path, e.g. https://my-pc.tailnet-name.ts.net';return;}localStorage.setItem(SERVER_KEY,v);urlServer=null;renderServerPickers();$('pairAddress').value=v;toast('Server saved on this device.');};
+ reset.onclick=()=>{localStorage.removeItem(SERVER_KEY);urlServer=null;renderServerPickers();const c=chosenServer();$('pairAddress').value=c?c.url:'';};
+ const row=el('div',undefined,'buttons');row.append(reset,save);const head=box.closest('#pairDialog')?el('p','Change server','micro server-head'):null;box.append(...[head,sel,inp,row,msg].filter(Boolean));}}
+async function loadServerConfig(){const q=new URLSearchParams(location.search).get('server');if(q){urlServer=cleanServer(q);if(!urlServer)notice('Ignored ?server= link: it must be a plain https:// address.',true);}
+ if(WEB&&!PREVIEW){try{const r=await fetch('server-config.json',{cache:'no-store'});if(r.ok)siteServers=parseServerConfig(await r.json());}catch(e){}}
+ renderServerPickers();}
+const _showForm=showForm;showForm=function(kind,profile){_showForm(kind,profile);if(!profile&&!$('pairAddress').value){const c=chosenServer();if(c){$('pairAddress').value=c.url;if(serverInfo(c.url)?.mode==='chatgpt-only')$('profileKind').value='cloud';}}};
+loadServerConfig();
 startup();
