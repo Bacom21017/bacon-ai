@@ -229,7 +229,8 @@ function lookFromForm(){return {...look,name:$('appName').value.trim()||'Bacon A
 function fillLookForm(){$('appName').value=look.name;$('appShort').value=look.shortName;$('appTheme').value=look.themeColor;$('appBg').value=look.backgroundColor;}
 for(const e of ['🥓','⚡','🤖','🧠','🚀','🎮','💻','🐱','🌸','⭐']){const b=el('button',e);b.type='button';b.onclick=()=>{look.icon=null;look.emoji=e;applyLook(lookFromForm());};$('appEmojiPicker').append(b);}
 for(const id of ['appName','appShort','appTheme','appBg'])$(id).addEventListener('input',()=>applyLook(lookFromForm()));
-$('appIconFile').onchange=async()=>{const f=$('appIconFile').files[0];if(!f)return;$('appLookMsg').textContent='Preparing icon…';try{const small=await shrinkImage(f,512);const im=await lookImage(small);
+$('appUploadLabel').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('appIconFile').click();}});
+$('appIconFile').onchange=async()=>{const f=$('appIconFile').files[0];if(!f)return;$('appLookMsg').textContent='Preparing icon…';const quick=URL.createObjectURL(f);$('appTilePreview').src=quick;$('appTilePreview').style.objectFit='cover';setTimeout(()=>URL.revokeObjectURL(quick),30000);try{const small=await shrinkImage(f,512);const im=await lookImage(small);
  const c=document.createElement('canvas');c.width=c.height=512;c.getContext('2d').drawImage(im,0,0,512,512);look.icon=c.toDataURL('image/png');if(look.icon.length>600000){const q=document.createElement('canvas');q.width=q.height=384;q.getContext('2d').drawImage(im,0,0,384,384);look.icon=q.toDataURL('image/png');}
  look.emoji=null;await applyLook(lookFromForm());$('appLookMsg').textContent='Icon ready. Press Save & apply.';}catch(e){$('appLookMsg').textContent=e.message;}};
 bind('appLookSave',async()=>{const cfg=lookFromForm();await applyLook(cfg);if(!PREVIEW)localStorage.setItem(LOOK_KEY,JSON.stringify(look));if(token){try{await api('me-app',look);}catch(e){notice('Saved on this device only: '+e.message,true);return;}}
@@ -259,4 +260,11 @@ bind('themeSave',async()=>{if(!PREVIEW)localStorage.setItem(THEME_KEY,JSON.strin
 bind('themeReset',async()=>{const {label,...c}=THEMES.bacon;applyTheme({...c,preset:'bacon'});localStorage.removeItem(THEME_KEY);if(token)await api('me-theme',theme).catch(()=>{});toast('Back to Bacon.','green');});
 async function loadTheme(){try{const t=await api('me-theme');if(t&&t.accent){applyTheme(t);if(!PREVIEW)localStorage.setItem(THEME_KEY,JSON.stringify(t));}}catch(e){}}
 try{const saved=JSON.parse(localStorage.getItem(THEME_KEY)||'null');applyTheme(saved||theme);}catch(e){applyTheme(theme);}
+/* ---- "Customize icon" entry points ---- */
+const STANDALONE=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+function openIconEditor(){page('monitor');requestAnimationFrame(()=>{const card=$('appLookCard');card.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});card.classList.add('flash');setTimeout(()=>card.classList.remove('flash'),1400);$('appUploadLabel').focus({preventScroll:true});});}
+bind('customizeIconBtn',openIconEditor);bind('iconTipOpen',()=>{openIconEditor();});
+bind('iconTipClose',()=>{localStorage.setItem('bacon-icon-tip','done');$('iconTip').hidden=true;});
+if(STANDALONE)$('iconTipText').textContent='Pick your app\u2019s name, icon and colours. You\u2019re using the installed app: on iPhone/iPad, changes appear after you remove the home-screen icon and add it again.';
+$('iconTip').hidden=localStorage.getItem('bacon-icon-tip')==='done';
 startup();
