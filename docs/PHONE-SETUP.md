@@ -73,9 +73,11 @@ Brain Mode. ChatGPT Plus needs that always-on server; see `docs/ORACLE-FREE.md`.
 - Family members choose **Connect my PC → Family account → Create account** (email + password).
 - New accounts stay **pending** until you approve them in **Control center → 👪 Accounts**, so
   someone with the link can't use your AI. Each person gets their own chats, projects and bots.
-- The email is only a login name. Bacon AI doesn't email family members and doesn't verify addresses.
-- Optional: run `py -3 scripts\setup_email.py` (or `python3 scripts/setup_email.py` on the server) to get an
-  email for each new sign-up with **Approve / Decline** links. The links are signed, work once and expire
+- **Sign-up needs email set up.** Run `py -3 scripts\setup_email.py` (or `python3 scripts/setup_email.py` on the server)
+  once, using an app password for your mail account. Until you do, sign-up stays off with a clear message.
+- Sign-up emails the person a **6-digit code**. They enter it in the app (it expires in 15 minutes, they get 5 tries,
+  and **Resend code** works once a minute). The account only exists after the right code, so every address is real.
+- Then you get an email for the new sign-up with **Approve / Decline** links. The links are signed, work once and expire
   after 48 hours. Opening one only shows a confirmation: you must be signed in as the owner and press **Confirm**.
 - You can set a personal **cloud calls per day** limit for each person. Only you see the shared ChatGPT allowance.
 - **Ban** blocks the account, every browser it used, and its Tailscale identity (when Tailscale reports one).
