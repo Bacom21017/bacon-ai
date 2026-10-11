@@ -60,3 +60,11 @@ img{max-width:100%}
 .presets,.segmented{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.presets button,.segmented button{flex:1;min-width:64px}.segmented button.selected,.presets button.selected{background:#462332;border-color:#ff8dab;color:#ffd1de}
 .brain-chip{cursor:pointer;background:#1f2a33;border-color:#3b6b8a;color:#bfe3ff}
 .model-list{display:grid;gap:8px}.model-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:10px;border:1px solid var(--border);border-radius:10px}.model-row.active{border-color:#58cc99}.model-row small{display:block;color:var(--muted)}.tag{display:inline-block;font-size:10px;padding:2px 6px;border-radius:6px;margin-left:4px;border:1px solid #49404b}.tag.ok{border-color:#2f8a63;color:#a9f0cc}.tag.warn{border-color:#c2702a;color:#ffc58a}.model-row progress{grid-column:1/-1;width:100%}
+
+.connect-dialog{width:min(480px,calc(100vw - 24px))}.connect-head{display:flex;justify-content:space-between;align-items:center}.profile-buttons{display:grid;gap:8px;margin-bottom:10px}
+.big-option{display:grid;gap:2px;width:100%;text-align:left;padding:14px 16px;margin:6px 0;font-size:16px;min-height:60px}.big-option small{font-weight:400;font-size:12px;opacity:.8}.quiet-option{background:transparent}
+.profile-row{display:flex;gap:6px;align-items:stretch}.profile-row .big-option{flex:1;margin:0}.profile-row .icon-button{min-width:44px;border:1px solid #49404b;border-radius:9px;font-size:16px}
+.explainer{padding:12px;border:1px solid #3b6b8a;border-radius:10px;background:#16222b;font-size:13px;margin:8px 0}.explainer a{color:#7cc4ff}
+.blocked-screen{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:#121116;text-align:center;padding:24px}.blocked-screen h1{font-size:28px}
+.accounts-list{display:grid;gap:10px}.account-row{border:1px solid var(--border);border-radius:10px;padding:12px;display:grid;gap:8px}.account-row .buttons{flex-wrap:wrap}.account-row .status{font-size:11px;padding:2px 8px;border-radius:6px;border:1px solid #49404b}.status.pending{border-color:#a8932b;color:#ffe48a}.status.active{border-color:#2f8a63;color:#a9f0cc}.status.banned,.status.denied{border-color:#d14862;color:#ffc2cf}
+.connect-msg{padding:10px 12px;border-radius:10px;background:#1f1c25;border:1px solid #49404b;font-size:13px}.connect-msg.error{border-color:#d14862;color:#ffc2cf}

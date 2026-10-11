@@ -7,7 +7,7 @@ const clone=v=>JSON.parse(JSON.stringify(v));
 const GREETING_BOT={id:'my-ai',name:'My AI',description:'Bacon AI · your coding partner, chatbot, or personal AI assistant.',instructions:'',personality:'Friendly, upbeat Bacon AI by Diab Productions.',mode:'coding',emoji:'⚡',icon:null,cloudTarget:60,projectSettings:{}};
 function fresh(){
   const project={id:hex(),name:'Sample calculator',kind:'python',botId:'my-ai',created:Date.now()};
-  const s={bots:[clone(GREETING_BOT)],projects:[project],jobs:[],files:{},checkpoints:{},localOnly:false,remaining:82,calls:2,limit:12,paused:false,emergency:false,reason:'',generation:0,routing:0,brain:{brainMode:'hybrid',power:'balanced',localModel:'qwen2.5-coder:7b',cloudModel:''},installed:['qwen2.5-coder:7b','llama3.1:8b'],pulls:{}};
+  const s={bots:[clone(GREETING_BOT)],projects:[project],jobs:[],files:{},checkpoints:{},localOnly:false,remaining:82,calls:2,limit:12,paused:false,emergency:false,reason:'',generation:0,routing:0,brain:{brainMode:'hybrid',power:'balanced',localModel:'qwen2.5-coder:7b',cloudModel:''},installed:['qwen2.5-coder:7b','llama3.1:8b'],pulls:{},accounts:[{id:hex(),email:'sara@example.com',name:'Sara (sample)',role:'user',status:'pending',created:now(),cloudBudget:null,devices:1,tailnet:[]},{id:hex(),email:'omar@example.com',name:'Omar (sample)',role:'user',status:'active',created:now(),cloudBudget:5,devices:2,tailnet:['ts-user:omar@example.com']}],bans:{devices:0,tailnet:[]}};
   s.files[project.id]={'calc.py':'def add(a, b):\n    return a + b\n'};s.checkpoints[project.id]=[];return s;
 }
 const POWER={light:{label:'Light',budgetFactor:0.4,reasoningEffort:'low',parallel:false},balanced:{label:'Balanced',budgetFactor:0.75,reasoningEffort:'medium',parallel:true},max:{label:'Max',budgetFactor:1,reasoningEffort:'high',parallel:true}};
@@ -66,6 +66,9 @@ function handle(path,method,body){const [route,qs]=path.split('?');const q=new U
       case 'bots':return clone(S.bots);case 'projects':return clone(S.projects);case 'builds':return clone([...S.jobs].reverse());
       case 'control-center':return center();
       case 'models':return modelsStatus();
+      case 'me':return {id:'owner',email:'owner',role:'admin',status:'active',owner:true};
+      case 'accounts':return {accounts:clone(S.accounts),emailConfigured:false,emailError:null,bans:clone(S.bans)};
+      case 'approval-link':err(400,'Preview: approval links come from real sign-up emails.');
       case 'integrations':return [{name:'Preview mode',status:'Sample data only. Connect your PC for real integrations.'},{name:'Python',status:'File editing + approved unittest execution'},{name:'Roblox Studio',status:'Bridge implemented; live Windows validation required'}];
       case 'project-files':project(q.get('id'));return clone(S.files[q.get('id')]);
       case 'checkpoints':project(q.get('id'));return S.checkpoints[q.get('id')].map(c=>({id:c.id,created:c.created,reason:c.reason})).reverse();
@@ -97,6 +100,13 @@ function handle(path,method,body){const [route,qs]=path.split('?');const q=new U
       if(st.localModel){if(!S.installed.includes(st.localModel))err(400,'Install that Ollama model first (Pull), then select it.');S.brain.localModel=st.localModel;}
       if(st.cloudModel!==undefined)S.brain.cloudModel=String(st.cloudModel).slice(0,60);return clone(S.brain);}
     case 'model-pull':{if(body.confirmed!==true)err(400,'Downloading a model needs confirmation (it can be several GB).');const name=String(body.name||'');if(!CATALOG.some(c=>c.name===name))err(400,'Invalid Ollama model name.');if(Object.values(S.pulls).some(p=>p.state==='pulling'))err(400,'A model download is already running.');S.pulls[name]={state:'pulling',status:'starting (simulated)',percent:0};simulatePull(name);return {name,state:'pulling'};}
+    case 'signup':case 'login':err(400,'Preview: accounts are simulated. Connect a real controller to sign up or sign in.');
+    case 'logout':return {signedOut:true};
+    case 'accounts':{const u=S.accounts.find(x=>x.id===body.id)||err(400,'Account not found.');const a=body.action;
+      if(a==='update'){const c=body.changes||{};if(c.status&&!['active','denied','pending'].includes(c.status))err(400,'Invalid status.');if(c.role&&!['user','admin'].includes(c.role))err(400,'Invalid role.');if('cloudBudget' in c&&c.cloudBudget!==null&&!(Number.isInteger(c.cloudBudget)&&c.cloudBudget>=0&&c.cloudBudget<=1000))err(400,'Cloud budget must be 0–1000 calls per day, or blank for no personal limit.');Object.assign(u,c);}
+      else if(a==='ban'){u.status='banned';S.bans.devices+=u.devices;for(const t of u.tailnet)if(!S.bans.tailnet.includes(t))S.bans.tailnet.push(t);}
+      else if(a==='unban'){u.status='denied';S.bans.devices=Math.max(0,S.bans.devices-u.devices);S.bans.tailnet=S.bans.tailnet.filter(t=>!u.tailnet.includes(t));}
+      else if(a==='remove')S.accounts=S.accounts.filter(x=>x.id!==u.id);else err(400,'Unknown account action.');return clone(u);}
     case 'allowance-refresh':return {refreshing:true};
     default:err(404,'Not available in preview.');}
 }
