@@ -50,3 +50,9 @@ img{max-width:100%}
  .checkpoint{flex-wrap:wrap;gap:8px}
  footer{padding-bottom:calc(20px + env(safe-area-inset-bottom));font-size:11px}
 }
+
+.preview-bar{position:sticky;top:0;z-index:25;margin:0 0 16px;padding:10px 14px;border-radius:12px;border:1px dashed #ff8dab;background:#2a1520f2;backdrop-filter:blur(10px)}.preview-row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}.preview-row.sim{justify-content:flex-start;gap:6px;margin-top:8px}.preview-row.sim button{padding:6px 10px;font-size:12px;min-height:36px}.preview-entry{margin-top:16px;padding-top:14px;border-top:1px solid var(--border);display:grid;gap:8px}
+@media(max-width:720px){.preview-bar{top:calc(64px + env(safe-area-inset-top))}.preview-row.sim{overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px}.preview-row.sim button{flex:0 0 auto;font-size:13px}}
+
+.chat-history{min-width:0;max-width:100%}.chat-message{min-width:0;max-width:100%;overflow-wrap:anywhere;box-sizing:border-box}.chat-message .md,.code-block{min-width:0;max-width:100%}.code-block pre{max-width:100%;overflow-x:auto}
+.chat-history{grid-template-columns:minmax(0,1fr)}.chat-message.user{max-width:90%}
